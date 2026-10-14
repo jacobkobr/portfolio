@@ -1,7 +1,10 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import {Avatar, Label} from '@primer/react';
-import {GitCommitIcon, FileIcon, ChevronDownIcon, CodeIcon, ArrowRightIcon} from '@primer/octicons-react';
-import {profile, projects, milestones, skillGroups} from './content';
+import {GitCommitIcon, FileIcon, ChecklistIcon, ArrowRightIcon, CodeIcon} from '@primer/octicons-react';
+import {profile, projects, commits, portfolioFiles} from './content';
+import {readPortfolioFiles} from './portfolio-files';
+import {MarkdownFile} from './markdown';
+import {FileBrowser} from './file-browser';
 
 export function Conversation() {
   return <div className="timeline">
@@ -10,56 +13,55 @@ export function Conversation() {
       <header className="comment-header"><span><strong>jacobkobr</strong> <span className="muted">opened this portfolio</span></span><Label>Author</Label></header>
       <div className="markdown">
         <h2>Hi, I’m Jacob.</h2>
-        <p>{profile.introduction}</p>
+        <p>I’m studying computer science at Arizona State University and expect to finish my B.S. in December 2027.</p>
+        <h2>Experience</h2>
+        <p><strong><Link href="/experience/fox">FOX Technology</Link></strong><br />Software Engineering Intern</p>
         <h2>What I’ve been building</h2>
-        {projects.map(project => <div className="project-summary" key={project.slug}><h3><Link href={project.href}>{project.name}</Link></h3><p>{project.summary}</p></div>)}
+        <ul className="project-overview">{projects.map(project => <li key={project.slug}>
+          <Link href={`/projects/${project.slug}`}>{project.name}</Link>: {project.summary}
+        </li>)}</ul>
+        <h2>Documentation</h2>
+        <p><Link href="/docs/kalshi">Building an Automated Prediction Market Trading System</Link><br />How I tested the strategies, what didn’t work, and what happened when I started trading live.</p>
       </div>
     </article>
-    <div className="timeline-event"><span className="event-icon"><GitCommitIcon /></span><p><Link href="/?tab=commits">Project history</Link><br /><span className="muted">Notes from each project.</span></p></div>
-    <div className="timeline-end"><FileIcon /><strong>{projects.length} project files</strong><Link href="/?tab=files">View files <ArrowRightIcon /></Link></div>
+    <div className="timeline-event"><span className="event-icon"><GitCommitIcon /></span><p><Link href="/?tab=commits">View portfolio updates</Link></p></div>
+    <div className="timeline-end"><FileIcon /><strong>{portfolioFiles.length} files</strong><Link href="/?tab=files">View files <ArrowRightIcon /></Link></div>
   </div>;
 }
 
 export function Commits() {
-  const history = projects.map(project => ({
-    ...project,
-    milestones: milestones.filter(milestone => milestone.project === project.slug),
-  })).sort((a, b) => a.milestones[0].date.localeCompare(b.milestones[0].date));
-
-  return <section className="view-content" aria-labelledby="milestones-title">
-    <h2 id="milestones-title">Selected projects</h2>
-    <p className="view-description">Project notes and milestones, grouped by project.</p>
-    <div className="milestones">{history.map(project => <div className="milestone" key={project.slug}>
-      <GitCommitIcon />
-      <article className="file-box">
-        <header className="comment-header"><strong>{project.name}</strong><Label>{project.status}</Label></header>
-        <div className="markdown">
-          <p>{project.summary}</p>
-          <p className="project-stack">{project.technologies.join(' · ')}</p>
-          <ul className="project-milestones">{project.milestones.map(milestone => <li key={milestone.date}><time dateTime={milestone.date}>{milestone.date}</time><span>{milestone.title}</span></li>)}</ul>
-          <Link href={project.href}>Read more <ArrowRightIcon /></Link>
+  return <section className="view-content" aria-labelledby="commits-title">
+    <div className="commit-timeline"><section className="commit-group">
+      <h2 id="commits-title"><GitCommitIcon />Portfolio updates</h2>
+      <ul className="commit-list">{commits.map(commit => <li className="commit-row" id={commit.id} key={commit.id}>
+        <div className="commit-content">
+          <Link className="commit-title" href={`/?tab=files#${commit.files[0].path.replaceAll(/[/.]/g, '-')}`}>{commit.message}</Link>
+          <div className="commit-meta">
+            <a className="commit-author" href={profile.github}><Avatar src="/avatar.png" alt="" size={20} />{profile.username}</a>
+            <span>committed</span>
+          </div>
         </div>
-      </article>
-    </div>)}</div>
+        <div className="commit-actions">
+        <details className="commit-files">
+          <summary>{commit.files.length} {commit.files.length === 1 ? 'file' : 'files'}</summary>
+          <ul>{commit.files.map(file => <li key={file.path}><Link href={`/?tab=files#${file.path.replaceAll(/[/.]/g, '-')}`}>{file.path}</Link></li>)}</ul>
+        </details>
+        <Link className="commit-link" href={`/?tab=files#${commit.files[0].path.replaceAll(/[/.]/g, '-')}`} aria-label={`View files: ${commit.message}`}><CodeIcon /></Link>
+        </div>
+      </li>)}</ul>
+    </section></div>
   </section>;
 }
 
 export function Checks() {
-  return <section className="view-content" aria-labelledby="skills-title">
-    <h2 id="skills-title">Tools I’ve worked with</h2>
-    <p className="view-description">Grouped by where I’ve used them.</p>
-    <div className="checks-layout"><div className="checks-label"><CodeIcon /><strong>Project experience</strong><span className="muted">{skillGroups.length} areas</span></div>
-      <div className="check-list">{skillGroups.map(group => <details className="check-row" key={group.name} open><summary><ChevronDownIcon /><CodeIcon /><strong>{group.name}</strong></summary><div><p>{group.description}</p><Link href={projects.find(project => project.slug === group.project)!.href}>View project <ArrowRightIcon /></Link></div></details>)}</div>
-    </div>
+  return <section className="empty-checks" aria-labelledby="checks-title">
+    <ChecklistIcon size={32} />
+    <h2 id="checks-title">No checks configured</h2>
+    <p>No CI runs to show for this portfolio.</p>
   </section>;
 }
 
-export function Files() {
-  return <section className="view-content" aria-labelledby="files-title">
-    <div className="files-heading"><h2 id="files-title">{projects.length} project files</h2></div>
-    <div className="file-list">{projects.map(project => <details className="file-box" key={project.slug}>
-      <summary><ChevronDownIcon /><FileIcon /><strong>{project.slug === 'kalshi' ? 'docs/kalshi.html' : `projects/${project.slug}.md`}</strong></summary>
-      <div className="file-entry"><span>{project.name}</span><Link href={project.href}>Open file <ArrowRightIcon /></Link></div>
-    </details>)}</div>
-  </section>;
+export async function Files() {
+  const files = await readPortfolioFiles();
+  return <FileBrowser files={files.map(file => ({id: file.id, path: file.path, preview: <MarkdownFile file={file} />}))} />;
 }
