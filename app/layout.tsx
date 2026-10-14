@@ -10,8 +10,8 @@ import {RepoNav} from './repo-nav';
 import './styles.css';
 
 export const metadata: Metadata = {
-  title: 'Add Jacob Kobrick #1 · Portfolio',
-  description: 'Jacob Kobrick’s projects and software engineering experience, presented as a pull request.',
+  title: "Jacob Kobrick's Portfolio",
+  description: 'My education, experience, and what I enjoy building!',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
