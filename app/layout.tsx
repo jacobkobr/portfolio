@@ -1,0 +1,36 @@
+import type {Metadata} from 'next';
+import Link from 'next/link';
+import {MarkGithubIcon} from '@primer/octicons-react';
+import '@primer/primitives/dist/css/functional/themes/light.css';
+import '@primer/primitives/dist/css/functional/themes/dark.css';
+import '@primer/primitives/dist/css/base/size/size.css';
+import {Theme, ThemeSelect} from './theme';
+import {profile} from './content';
+import {RepoNav} from './repo-nav';
+import './styles.css';
+
+export const metadata: Metadata = {
+  title: 'Add Jacob Kobrick #1 · Portfolio',
+  description: 'Jacob Kobrick’s projects and software engineering experience, presented as a pull request.',
+};
+
+export default function RootLayout({children}: {children: React.ReactNode}) {
+  // Primer's focus polyfill adds these attributes before React hydrates.
+  return (
+    <html lang="en" className="js-focus-visible" data-js-focus-visible="">
+      <body><Theme>
+        <a className="skip-link" href="#main">Skip to content</a>
+        <header className="site-header">
+          <div className="global-bar">
+            <a className="github-mark" href={profile.github} aria-label="Jacob Kobrick on GitHub"><MarkGithubIcon size={32} /></a>
+            <div className="breadcrumbs"><a href={profile.github}>jacobkobr</a><span>/</span><Link href="/">portfolio</Link></div>
+            <ThemeSelect />
+          </div>
+          <RepoNav />
+        </header>
+        {children}
+        <footer>Jacob Kobrick</footer>
+      </Theme></body>
+    </html>
+  );
+}
