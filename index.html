@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prediction Market Trading System</title>
+<meta name="description" content="How I built a data recorder, research harness, and live execution system for Kalshi's 15-minute Bitcoin contracts, and what three months of data showed about whether there was an edge.">
+<meta name="author" content="Jacob Kobrick">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Building an Automated Prediction Market Trading System">
+<meta property="og:description" content="Data recording, XGBoost evaluation against the market price, guarded live execution, and real results on Kalshi's 15-minute Bitcoin contracts.">
+<meta name="twitter:card" content="summary">
+<script>
+try {
+  var savedTheme = localStorage.getItem('portfolio-theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme;
+} catch {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#FBFBFA; --ink:#1A1D21; --muted:#596169; --faint:#868E96;
+  --rule:#E2E5E8; --grid:#ECEEF1; --accent:#1D5C8C; --bar:#B4C9DA; --s2:#8D959D;
+  --code-bg:#F2F3F4;
+  --sans:"IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131518; --ink:#E4E7EA; --muted:#A2A9B1; --faint:#78808A;
+    --rule:#2A2E34; --grid:#22262B; --accent:#74AADA; --bar:#2E4A62; --s2:#7B848D;
+    --code-bg:#1C1F23; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131518; --ink:#E4E7EA; --muted:#A2A9B1; --faint:#78808A;
+  --rule:#2A2E34; --grid:#22262B; --accent:#74AADA; --bar:#2E4A62; --s2:#7B848D;
+  --code-bg:#1C1F23; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 var(--sans);
+  padding-inline:20px;padding-block:56px 80px}
+main{max-width:860px;margin:0 auto}
+.back-link{display:inline-block;margin-bottom:24px;font-size:.86rem}
+.prose{max-width:680px}
+h1,h2,h3{font-weight:600;line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:2.05rem;letter-spacing:-0.012em}
+h2{font-size:1.3rem;margin-bottom:14px;display:flex;gap:14px;align-items:baseline}
+h2 .n{font:500 .8rem/1 var(--mono);color:var(--faint)}
+p{margin:0 0 16px}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code{font:400 .86em var(--mono);background:var(--code-bg);padding:1px 5px;border-radius:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.dek{color:var(--muted);font-size:1.12rem;margin:14px 0 18px;max-width:640px}
+.meta{font:400 .8rem/1.7 var(--mono);color:var(--faint);display:flex;flex-wrap:wrap;gap:4px 22px;
+  padding-block:12px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.meta b{font-weight:500;color:var(--muted)}
+section{padding-top:48px}
+header + section{padding-top:36px}
+figure{margin:28px 0 30px}
+figcaption{font-size:.86rem;line-height:1.55;color:var(--muted);margin-top:10px;max-width:680px}
+figcaption b{font-weight:600;color:var(--ink)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#arch{min-height:200px}
+#arch svg{display:block;margin:0 auto;max-width:100%;height:auto}
+.chart-box{position:relative;width:100%}
+.chart-roc{aspect-ratio:1/1;max-width:420px}
+.chart-pnl{height:320px;min-width:560px}
+.fig-row{margin-bottom:30px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
+.fig-row figure{margin:0}
+@media (max-width:720px){.fig-row{grid-template-columns:minmax(0,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+caption{caption-side:bottom;text-align:left;font-size:.86rem;color:var(--muted);padding-top:10px;line-height:1.55}
+caption b{color:var(--ink);font-weight:600}
+th{font:500 .74rem/1.3 var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.05em;
+  text-align:left;padding:0 12px 8px 0;border-bottom:1px solid var(--ink);vertical-align:bottom}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+td.num,th.num{text-align:right;white-space:nowrap}
+td .s{display:block;font-size:.8rem;color:var(--faint)}
+.tbl{margin:26px 0 30px}
+.tbl-sm{max-width:440px}
+dl.notes{margin:0}
+dl.notes dt{font-weight:600;margin-top:26px}
+dl.notes dd{margin:6px 0 0}
+footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font:400 .8rem/1.7 var(--mono);color:var(--faint)}
+@media (max-width:560px){
+  body{font-size:16px;padding-block:32px 56px;padding-inline:16px}
+  h1{font-size:1.6rem}
+  td,th{padding-right:8px}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+<main>
+
+<a class="back-link" href="/docs/kalshi">Back to documentation</a>
+<header>
+  <h1>Building an Automated Prediction Market Trading System</h1>
+  <p class="dek">How I built a data recorder, research harness, and live execution system for Kalshi's 15-minute Bitcoin contracts, and what three months of data showed about whether there was an edge.</p>
+  <div class="meta">
+    <span><b>Jacob Kobrick</b></span>
+    <span>June – September 2026</span>
+  </div>
+</header>
+
+<section aria-labelledby="intro">
+  <div class="prose">
+    <h2 id="intro" class="sr">Introduction</h2>
+    <p>Kalshi lists a Bitcoin contract every 15 minutes that asks a single question: will BTC be above a given strike price when the window closes? It resolves on the CF Benchmarks Real-Time Index (BRTI), a per-second Bitcoin price built from several major exchanges, averaged over the last 60 seconds before close. The contracts trade on a normal limit order book in one-cent ticks. How I got interested was a bit roundabout. I kept seeing fake "AI crypto trading bots" promoted on X and Reddit that were really just credential and secret loggers, built to quietly send your exchange API keys or wallet secrets to whoever wrote them. There were a lot of them, and none made money for anyone except the people running the scam. Seeing so many made me curious about the honest version of the question, and I believed that an actual edge probably did exist somewhere in these markets, because of how the displayed price on Kalshi's UI was calculated and the delays I noticed on that end. Kalshi's 15-minute contracts seemed like a good place to look, since the horizon is so short and the settlement rule is completely public. If people were mispricing them, I figured it was something I could actually measure.</p>
+    <p>I didn't have a strategy in mind when I started, and I didn't want to commit to one before I had data, so the first thing I built was a recorder. The rest came later. There's a backtesting harness that replays recorded markets at prices I could realistically have gotten, a paper-trading engine, and eventually a live executor with a stack of risk checks in front of it. Most of the ideas I tested along the way didn't work. This write-up covers how the system fits together, how I evaluated the models, and what happened once it was trading real money.</p>
+  </div>
+</section>
+
+<section aria-labelledby="design">
+  <div class="prose">
+    <h2 id="design"><span class="n">1</span>System design</h2>
+    <p>Everything runs on one small Linux VPS as three <code>systemd</code> services. Two of them are recorders: one writes a row per second for each open contract, and the other stores the BRTI value once a second, both into SQLite. The third is the trading service. It's a single asyncio process (FastAPI serves the dashboard) that keeps the current order book in memory, runs the strategy on every tick, logs each decision, and sends real orders when live mode is turned on.</p>
+  </div>
+
+  <figure>
+    <div class="scroll"><div id="arch" role="img" aria-label="Architecture diagram: the Kalshi WebSocket and BRTI feeds go to two recorders that write SQLite, and to the trading service. Inside the trading service, live state feeds the strategy, then the paper ledger, risk guards, and executor. The executor talks to the Kalshi REST API. Offline research reads SQLite and writes strategy config back to the trading service, which also serves a dashboard."></div></div>
+    <figcaption><b>Figure 1.</b> How data moves through the system. The recorders run separately from the trading service, so stopping or restarting trading never leaves a hole in the research data. Strategy settings live in a SQLite table that the trading service rereads every second, which lets me change a parameter without restarting anything.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>I went with SQLite instead of Postgres because each recorder is the only process writing to its tables, and I could copy a database straight to my laptop for analysis. The one catch was that SQLite's online backup never finishes while a recorder is writing every second, so I take snapshots by pausing the recorder briefly and copying the file.</p>
+    <p>Every signal the strategy produces goes into a paper ledger, regardless of whether a live order was sent or filled. I wanted the strategy's track record to stay continuous even when the account ran short on funds or an order got rejected. It also meant I could compare what the strategy wanted to do against what actually executed, and that comparison is how I confirmed that live fills matched the prices my backtests assumed.</p>
+    <p>Settlement comes from polling the REST API rather than from the WebSocket. When a new contract opens, Kalshi's feed stops sending updates for the previous one, so the settlement message for a position I'm still holding can just never show up. Polling is slower, but it doesn't miss anything.</p>
+    <p>Live trading stays off unless I deliberately turn it on. Before each order, the executor checks that two separate environment flags both allow live trading, that the exchange reports itself open, that the balance covers the order with room to spare, and that the order fits under the per-order, per-session, and session-loss limits. If any one of those checks fails, nothing gets sent.</p>
+  </div>
+</section>
+
+<section aria-labelledby="eval">
+  <div class="prose">
+    <h2 id="eval"><span class="n">2</span>Model evaluation</h2>
+    <p>Over the first few weeks I trained three XGBoost models. The most developed one estimated the probability that a contract would settle YES, using per-second features from both the Kalshi market and the BRTI index. I trained it on 962 contracts from June 7 to 17 and held out the next 458 (June 18 to 23). Nothing about the held-out contracts was used during training, hyperparameter choices included, and the isotonic calibration step was fit on the training data only.</p>
+    <p>AUC measures how often a model gives a higher probability to a contract that settled YES than to one that settled NO, where 0.5 is a coin flip and 1.0 is perfect. On the held-out set the model scored an AUC of 0.905. That looks strong until you compare it with the obvious baseline. If you take each contract's last traded price and read it as a probability, you get 0.907 on exactly the same rows.</p>
+  </div>
+
+  <div class="fig-row">
+    <figure>
+      <div class="chart-box chart-roc"><canvas id="roc" role="img" aria-label="ROC curves on the held-out set. XGBoost model AUC 0.905; market price alone AUC 0.907. The two curves nearly overlap."></canvas></div>
+      <figcaption><b>Figure 2.</b> ROC curves on the held-out set (320,494 per-second observations from 458 contracts). The dashed curve uses the market's last price as the score, with no model involved.</figcaption>
+    </figure>
+    <div class="tbl" style="margin:0">
+      <table>
+        <caption><b>Table 1.</b> AUC by time remaining on the same held-out set. Rows from the same contract are highly correlated, so the effective sample size is much closer to 458 than to these row counts.</caption>
+        <thead><tr><th>Time to close</th><th class="num">Rows</th><th class="num">Model</th><th class="num">Market</th></tr></thead>
+        <tbody>
+          <tr><td>0–3 min</td><td class="num">62,440</td><td class="num">0.989</td><td class="num">0.988</td></tr>
+          <tr><td>3–7.5 min</td><td class="num">121,417</td><td class="num">0.929</td><td class="num">0.929</td></tr>
+          <tr><td>7.5–15 min</td><td class="num">136,637</td><td class="num">0.799</td><td class="num">0.803</td></tr>
+          <tr><td>All</td><td class="num">320,494</td><td class="num">0.905</td><td class="num">0.907</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>In other words, the model hadn't found anything the market didn't already know. Most of its AUC comes from the fact that outcomes get easier to call as a contract approaches expiry, and the price captures that just as well. Table 1 shows the two staying within a few thousandths of each other at every horizon. For trading, the question that matters is whether the model disagrees with the price in the cases where the price turns out to be wrong, and by enough to cover the spread and fees. To test that, I chose one trading rule using only the training period and ran it a single time on the held-out period, buying at the ask and paying Kalshi's fees.</p>
+  </div>
+
+  <div class="tbl">
+    <div class="scroll">
+    <table>
+      <caption><b>Table 2.</b> Approaches in the order I tried them. Return is net profit after fees divided by the total cost of the positions taken. Backtests buy at the ask and hold to settlement, and each one's trading rule was fixed before its out-of-sample window was scored. Model-row returns are approximate because they're derived from per-contract results. Live rows come from actual exchange fills, and the revised row also shows return on the account balance at the start of the period, which is what Figure 3 plots.</caption>
+      <thead><tr><th>Approach</th><th>Evaluation</th><th class="num">Return on capital</th></tr></thead>
+      <tbody>
+        <tr><td>XGBoost classifier, market data only<span class="s">58 features</span></td><td>Held-out 1,220 contracts, May 25 – Jun 7<span class="s">AUC 0.86</span></td><td class="num">−4.9%<span class="s">1,077 trades</span></td></tr>
+        <tr><td>XGBoost regressor on net return<span class="s">80 features</span></td><td>Held-out ~1.0M rows<span class="s">IC 0.009</span></td><td class="num">No signal<span class="s">best iteration = 0</span></td></tr>
+        <tr><td>XGBoost classifier, market + index<span class="s">27 features, isotonic calibration</span></td><td>Held-out 458 contracts, Jun 18–23<span class="s">AUC 0.905 (market 0.907)</span></td><td class="num">≈ −4%<span class="s">137 trades; ≈ +19% in-sample</span></td></tr>
+        <tr><td>Rule-based signal, first version</td><td>Live, Jun 9 – Jul 9</td><td class="num">−3.7%<span class="s">668 fills</span></td></tr>
+        <tr><td>Rule-based signal, revised</td><td>Live, Jul 13 – Aug 31</td><td class="num">+25.3%<span class="s">on starting balance; +1.8% per dollar deployed; 564 fills</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>The third model is a good illustration of how easy it is to fool yourself with this kind of data. With an operating point tuned on the training period it returned about 19% on capital in-sample, and then lost about 4% on contracts it had never seen. After that I retired all three models. The strategy that eventually went live is a much simpler rule built around how the contracts settle. Every change to it was tested on a walk-forward split first, and then again on a later window of data that I had deliberately never looked at.</p>
+    <p>The models still turned out to be useful, just not as strategies. They became the bar any new idea had to clear, since a signal that couldn't beat the market price on its own wasn't worth backtesting.</p>
+  </div>
+</section>
+
+<section aria-labelledby="perf">
+  <div class="prose">
+    <h2 id="perf"><span class="n">3</span>Live results and system performance</h2>
+    <p>The revised rule started trading real money on July 13. Figure 3 shows the cumulative return through the end of August, calculated from the fill cost and fees that Kalshi reported on each order.</p>
+  </div>
+
+  <figure>
+    <div class="scroll"><div class="chart-box chart-pnl"><canvas id="pnl" role="img" aria-label="Cumulative net return from July 13 to August 31, 2026, ending at plus 25.3 percent of the starting balance, with daily returns shown as bars."></canvas></div></div>
+    <figcaption><b>Figure 3.</b> Cumulative net return from July 13 to August 31, 2026, as a percentage of the account balance at the start of the period. There were 564 filled orders across 50 trading days, and 35 of those days finished positive. Position sizes went up roughly tenfold on July 25 (dashed line), which is why the daily swings get larger after that. The +1.8% in Table 2 is lower because it divides by the total cost of every position, and the same money gets reused many times a day.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Moving from paper trading to real orders through Kalshi's API went better than I expected. Before going live I had estimated the fee formula by working backward from a handful of test trades, trying to pin down how the fee changed with position size and contract price. The actual fees came in about 11% lower than my estimate, and fills at full size landed slightly better than the prices my backtests assumed, so slippage cost less than I had budgeted for.</p>
+    <p>Most of the bad days in late July and early August were days when Bitcoin moved steadily in one direction for hours, which this rule doesn't handle well. In replay I tried a few ways of limiting the damage, including a daily stop-loss, blocking certain hours, and exiting early when a position turned against me. None of them helped enough to justify the extra complexity. They tended to cut into the good days about as much as they protected the bad ones, so I left the rule alone.</p>
+  </div>
+
+  <div class="tbl tbl-sm">
+    <table>
+      <caption><b>Table 3.</b> Operational measurements from recorded data. Order latency runs from the local log entry written just before the request to the creation time the exchange reports, so it includes network time and any clock difference between the two machines.</caption>
+      <thead><tr><th>Measure</th><th class="num">Value</th></tr></thead>
+      <tbody>
+        <tr><td>Index ticks recorded, Aug 10 – Sep 27</td><td class="num">4.15M</td></tr>
+        <tr><td>Per-second market rows, same window</td><td class="num">3.83M</td></tr>
+        <tr><td>Contracts covered, same window</td><td class="num">4,440</td></tr>
+        <tr><td>Live orders sent, Jun – Sep</td><td class="num">1,578</td></tr>
+        <tr><td>Failed orders</td><td class="num">82 (5.2%)</td></tr>
+        <tr><td>Order latency, median / p90 / p99</td><td class="num">0.58 / 0.97 / 1.07 s</td></tr>
+        <tr><td>Settlement reconstruction error, mean</td><td class="num">$0.004</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <p>I did think about latency up front. I picked a VPS in Chicago on purpose because it's close to where Kalshi's API is hosted, and a ping from the server to the API comes back in about a millisecond. Since the network round trip is that short, most of the order latency in Table 3 is probably clock difference between the two machines or time spent on the exchange's side, though I can't separate those from the data I have. Beyond picking the location, I didn't spend much time optimizing for speed. The strategy reacts to things that play out over minutes, and when I studied the recorded order book, it took around ten seconds to reprice after a large index move. At that pace, shaving a few hundred milliseconds off order submission wouldn't have changed much. The more important check was whether fills at full size came in at the prices the backtests assumed, and they did. Of the 82 orders that failed, none failed because of price slippage.</p>
+  </div>
+</section>
+
+<section aria-labelledby="notes">
+  <div class="prose">
+    <h2 id="notes"><span class="n">4</span>Engineering notes</h2>
+    <dl class="notes">
+
+      <dt>Reconstructing settlement before trusting a backtest</dt>
+      <dd>A backtest has to know what each contract will settle at, and that depends on exactly how Kalshi averages the index. Before trusting any backtest, I rebuilt the settlement value from my own recorded ticks and compared it with Kalshi's published value on 332 contracts. The average error was under half a cent, and the worst was 28 cents. Getting there meant tracking down a parsing bug that read UTC timestamps as local time and shifted every window by four hours. Along the way I also found that unsettled markets store their result as an empty string instead of NULL, so they were passing a <code>NOT NULL</code> filter and getting counted as NO outcomes.</dd>
+
+      <dt>Connections that die silently</dt>
+      <dd>On August 11 the market recorder's WebSocket stopped delivering data without raising an error or closing, and the process sat idle for about 28 hours before I caught it. The trading service already restarts its feeds when they go quiet (after 8 seconds for the index and 60 for the order book). The recorder had a watchdog as well, but it watched for trade messages, and trades on these contracts can be sparse enough that it was never a reliable signal. That data is gone for good. What I took from it is that it's better to monitor what a process is actually writing than whether its connection looks healthy.</dd>
+
+      <dt>Win rate only means something next to entry price</dt>
+      <dd>The live rule wins most of its trades, and that number is easy to misread. On a binary contract, the price you pay is effectively the win rate you need to break even. If you buy at 80¢, a win pays you 20¢ and a loss costs you 80¢, so you have to win four times out of five just to break even, and a little more than that once fees are included. A strategy that wins 85% of the time at an average entry of 80¢ makes money, but the same 85% at an average entry of 88¢ loses it. The edge is the gap between the win rate and the average entry price, and in practice that gap is only a few percentage points, which is why a losing week can happen even when almost every trade wins. It's also why every return on this page is weighted by the money actually in each position. Early on I tracked an average return per trade with every trade counted equally, and during one losing week that number looked excellent because the small trades were mostly winners and the big ones were the losers.</dd>
+    </dl>
+  </div>
+</section>
+
+<section aria-labelledby="takeaways">
+  <div class="prose">
+    <h2 id="takeaways"><span class="n">5</span>Takeaways</h2>
+    <p>The machine learning experiments were a little humbling. I spent weeks building features, training models, and working through calibration, only to discover that the market's own price was slightly better at predicting the outcome. An AUC of 0.905 looks a lot less exciting with 0.907 sitting next to it. Still, I'm glad I went through the process, because it made me much more skeptical of results that look impressive in isolation.</p>
+    <p>I also underestimated how much of the project would have nothing to do with finding a trading strategy. Collecting reliable data, reconstructing settlement, accounting for fees, and making sure the live system behaved like the backtester took up most of the work.</p>
+    <p>The system is still running, and there's plenty I could improve. I'm not sure how much of the strategy's performance will hold up over a longer period, especially under different market conditions. Lately the edge seems to be getting smaller, and my guess is that other automated traders have started picking up on the same patterns, though I haven't been able to confirm that. Either way, I ended up with a much better understanding of how these markets work, a dataset I can keep experimenting with, and a system that has been genuinely fun to build. That's a pretty good outcome for something that started with me getting annoyed at crypto bot scams on X and Reddit.</p>
+  </div>
+</section>
+
+
+</main>
+
+<script>
+(function(){
+  var D = {"days":["Jul 13","Jul 14","Jul 15","Jul 16","Jul 17","Jul 18","Jul 19","Jul 20","Jul 21","Jul 22","Jul 23","Jul 24","Jul 25","Jul 26","Jul 27","Jul 28","Jul 29","Jul 30","Jul 31","Aug 1","Aug 2","Aug 3","Aug 4","Aug 5","Aug 6","Aug 7","Aug 8","Aug 9","Aug 10","Aug 11","Aug 12","Aug 13","Aug 14","Aug 15","Aug 16","Aug 17","Aug 18","Aug 19","Aug 20","Aug 21","Aug 22","Aug 23","Aug 24","Aug 25","Aug 26","Aug 27","Aug 28","Aug 29","Aug 30","Aug 31"],"daily":[-0.09,-0.12,0.41,0.04,0.01,-0.67,-0.02,0.22,0.23,0.43,0.3,0.31,0.77,3.58,0.47,0.69,-6.01,1.3,-5.57,10.22,-7.45,2.7,-7.18,2.36,3.42,1.51,1.24,4.72,0.98,-1.22,-6.52,1.75,-3.49,2.75,1.84,-2.08,4.83,2.88,5.32,0.29,2.14,8.79,-2.39,1.93,-10.95,0.59,6.25,-5.9,2.66,7.07],"cum":[-0.09,-0.21,0.2,0.24,0.25,-0.42,-0.44,-0.23,0.0,0.43,0.73,1.03,1.8,5.39,5.85,6.54,0.53,1.83,-3.74,6.49,-0.96,1.73,-5.44,-3.08,0.34,1.85,3.09,7.81,8.79,7.57,1.05,2.8,-0.69,2.06,3.9,1.82,6.65,9.52,14.84,15.13,17.28,26.07,23.68,25.62,14.66,15.26,21.5,15.6,18.26,25.33],"model":[[0.0,0.0],[0.0,0.0],[0.0006,0.1017],[0.0006,0.1017],[0.0006,0.1018],[0.0006,0.1018],[0.0006,0.1018],[0.0008,0.1311],[0.0008,0.1311],[0.0008,0.1311],[0.0008,0.1311],[0.0008,0.1311],[0.001,0.1457],[0.0013,0.1651],[0.0013,0.1652],[0.0013,0.1652],[0.0016,0.1865],[0.0016,0.1866],[0.0016,0.1866],[0.0016,0.1866],[0.0016,0.1866],[0.0016,0.1866],[0.0016,0.1866],[0.0016,0.1866],[0.0016,0.1867],[0.0016,0.1867],[0.0016,0.1867],[0.0016,0.1867],[0.0016,0.1867],[0.0026,0.2184],[0.0026,0.2184],[0.004,0.2762],[0.0043,0.2806],[0.0071,0.3292],[0.0071,0.3292],[0.0071,0.3292],[0.0071,0.3292],[0.0071,0.3292],[0.0086,0.3521],[0.0086,0.3521],[0.0086,0.3521],[0.0086,0.3521],[0.0086,0.3522],[0.0086,0.3522],[0.0086,0.3522],[0.0086,0.3522],[0.0086,0.3522],[0.0086,0.3527],[0.0086,0.3527],[0.0086,0.3527],[0.0086,0.3527],[0.0086,0.3527],[0.0088,0.3569],[0.0091,0.3593],[0.0091,0.3593],[0.0091,0.3593],[0.0091,0.3593],[0.0165,0.4435],[0.0165,0.4436],[0.0165,0.4436],[0.0173,0.4508],[0.0173,0.4508],[0.0173,0.4508],[0.0173,0.4509],[0.0196,0.4679],[0.0196,0.4679],[0.0201,0.4718],[0.0202,0.4723],[0.0202,0.4723],[0.0202,0.4723],[0.0202,0.4723],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5038],[0.0248,0.5039],[0.0248,0.5039],[0.0257,0.5097],[0.0257,0.5097],[0.0261,0.512],[0.0261,0.512],[0.0261,0.512],[0.0276,0.5208],[0.0276,0.5208],[0.057,0.6348],[0.0596,0.6426],[0.0596,0.6426],[0.0596,0.6426],[0.0841,0.6996],[0.0841,0.6996],[0.0841,0.6997],[0.0841,0.6997],[0.097,0.7244],[0.097,0.7244],[0.097,0.7244],[0.097,0.7245],[0.097,0.7245],[0.1311,0.7683],[0.1363,0.7749],[0.1363,0.7749],[0.1413,0.7809],[0.1413,0.7809],[0.1413,0.7809],[0.1413,0.7809],[0.1413,0.7809],[0.1829,0.8192],[0.1899,0.826],[0.1899,0.8261],[0.1899,0.8261],[0.1899,0.8261],[0.1899,0.8261],[0.1972,0.8326],[0.1975,0.8328],[0.1975,0.8328],[0.1975,0.8328],[0.2656,0.8829],[0.2657,0.8829],[0.2782,0.8896],[0.2782,0.8896],[0.2782,0.8896],[0.2975,0.9004],[0.2997,0.9013],[0.2997,0.9013],[0.3538,0.9266],[0.3538,0.9266],[0.3539,0.9266],[0.3539,0.9266],[0.3539,0.9266],[0.391,0.9391],[0.391,0.9391],[0.3961,0.9405],[0.3961,0.9405],[0.3981,0.9411],[0.3981,0.9411],[0.3981,0.9411],[0.3992,0.9414],[0.3993,0.9414],[0.4028,0.9423],[0.4029,0.9423],[0.4029,0.9423],[0.4029,0.9423],[0.4204,0.9462],[0.4206,0.9462],[0.4206,0.9462],[0.4206,0.9463],[0.4206,0.9463],[0.4206,0.9463],[0.4487,0.9517],[0.4487,0.9517],[0.4487,0.9517],[0.4487,0.9517],[0.4729,0.9564],[0.4729,0.9564],[0.4729,0.9564],[0.4729,0.9564],[0.4729,0.9565],[0.4729,0.9565],[0.5001,0.9621],[0.5001,0.9621],[0.5001,0.9621],[0.5001,0.9621],[0.5001,0.9621],[0.5002,0.9621],[0.5002,0.9621],[0.5002,0.9621],[0.5613,0.9729],[0.584,0.9768],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.5988,0.9783],[0.667,0.987],[0.667,0.987],[0.667,0.987],[0.667,0.987],[0.667,0.9871],[0.667,0.9871],[0.667,0.9871],[0.6911,0.9893],[0.6911,0.9893],[0.7508,0.9941],[0.7508,0.9941],[0.8913,0.9993],[0.8913,0.9993],[0.8913,0.9993],[0.932,0.9997],[0.9321,0.9997],[0.9664,1.0],[1.0,1.0]],"market":[[0.0,0.0],[0.0,0.0289],[0.0,0.042],[0.0,0.0571],[0.0,0.0639],[0.0,0.0698],[0.0,0.0786],[0.0,0.0837],[0.0,0.1075],[0.0001,0.1169],[0.0001,0.1249],[0.0001,0.1364],[0.0001,0.1413],[0.0002,0.1505],[0.0002,0.1546],[0.0003,0.1601],[0.0004,0.1676],[0.0005,0.1716],[0.0007,0.1789],[0.0007,0.1821],[0.0008,0.1854],[0.0009,0.1919],[0.001,0.1957],[0.0012,0.2013],[0.0013,0.204],[0.0013,0.2067],[0.0015,0.2121],[0.0016,0.2144],[0.0017,0.2193],[0.0019,0.2227],[0.002,0.2255],[0.0022,0.2306],[0.0023,0.233],[0.0025,0.2381],[0.0026,0.2411],[0.0027,0.244],[0.003,0.2499],[0.0031,0.2531],[0.0033,0.258],[0.0034,0.2602],[0.0035,0.2627],[0.0038,0.2671],[0.004,0.2699],[0.0042,0.2756],[0.0044,0.2782],[0.0045,0.2804],[0.0047,0.2846],[0.0049,0.2868],[0.0052,0.2912],[0.0053,0.2938],[0.0054,0.2957],[0.0056,0.3009],[0.0057,0.3028],[0.0059,0.3069],[0.006,0.309],[0.006,0.311],[0.0061,0.3158],[0.0062,0.3177],[0.0064,0.3228],[0.0065,0.3246],[0.0066,0.3263],[0.0069,0.3313],[0.0069,0.333],[0.0072,0.3359],[0.0073,0.3381],[0.0074,0.34],[0.0076,0.3433],[0.0078,0.3451],[0.0079,0.3465],[0.0081,0.35],[0.0082,0.3524],[0.0089,0.3639],[0.0102,0.3806],[0.0118,0.3975],[0.0153,0.4286],[0.0169,0.4443],[0.0198,0.4745],[0.0221,0.489],[0.0245,0.5032],[0.0299,0.5312],[0.0327,0.5442],[0.0387,0.5701],[0.0417,0.5822],[0.045,0.5947],[0.0514,0.6182],[0.0543,0.6292],[0.0607,0.6499],[0.064,0.6595],[0.0676,0.6698],[0.0759,0.6906],[0.0802,0.7012],[0.0908,0.7201],[0.0965,0.728],[0.1024,0.7368],[0.1154,0.7531],[0.1226,0.7603],[0.1356,0.7761],[0.1418,0.784],[0.1477,0.7918],[0.1614,0.8063],[0.1693,0.813],[0.1841,0.8259],[0.1915,0.8318],[0.1994,0.8383],[0.2149,0.8506],[0.2229,0.8568],[0.2404,0.869],[0.2489,0.8746],[0.2581,0.8802],[0.2777,0.8912],[0.2879,0.8965],[0.31,0.9069],[0.3216,0.912],[0.3337,0.9172],[0.3582,0.9267],[0.3709,0.9312],[0.3958,0.9395],[0.4091,0.9432],[0.4226,0.9466],[0.4519,0.9528],[0.4658,0.9551],[0.4938,0.9608],[0.5079,0.9641],[0.5231,0.9673],[0.5564,0.9732],[0.5725,0.9753],[0.6047,0.9785],[0.6213,0.9803],[0.6375,0.9824],[0.6497,0.9837],[0.6518,0.9842],[0.6554,0.9848],[0.6569,0.985],[0.6584,0.9853],[0.6616,0.9857],[0.6637,0.986],[0.6662,0.9863],[0.6696,0.9868],[0.6716,0.987],[0.6748,0.9876],[0.6764,0.9878],[0.6782,0.988],[0.6821,0.9884],[0.6847,0.9889],[0.6883,0.9893],[0.6903,0.9895],[0.6921,0.9897],[0.6959,0.9901],[0.6977,0.9903],[0.7016,0.9908],[0.704,0.991],[0.7059,0.9912],[0.7099,0.9916],[0.7118,0.9918],[0.7159,0.992],[0.7179,0.9921],[0.7202,0.9922],[0.7257,0.9923],[0.728,0.9924],[0.733,0.9926],[0.7355,0.9927],[0.7378,0.9928],[0.7431,0.9931],[0.7456,0.9933],[0.7529,0.9937],[0.7552,0.9938],[0.7583,0.9939],[0.7633,0.9942],[0.7659,0.9944],[0.7714,0.9948],[0.7742,0.995],[0.7772,0.9952],[0.7839,0.9959],[0.7873,0.9961],[0.7933,0.9964],[0.7964,0.9967],[0.7994,0.9969],[0.8057,0.9973],[0.809,0.9974],[0.8167,0.9978],[0.8209,0.9979],[0.8245,0.9979],[0.832,0.9981],[0.8361,0.9982],[0.8438,0.9984],[0.8475,0.9985],[0.8535,0.9986],[0.863,0.9988],[0.8677,0.9989],[0.8781,0.999],[0.8838,0.9991],[0.8907,0.9992],[0.9069,0.9993],[0.9197,0.9994],[0.9282,0.9995],[0.9318,0.9995],[0.9364,0.9996],[0.9492,0.9999],[0.9567,0.9999],[1.0,1.0]]};
+  var ARCH = [
+    'flowchart LR',
+    '  subgraph IN["Market data"]',
+    '    WS["Kalshi WebSocket<br/>order book · trades"]',
+    '    CF["CF Benchmarks BRTI<br/>settlement index, 1 Hz"]',
+    '  end',
+    '  subgraph SVC["Trading service (FastAPI)"]',
+    '    direction TB',
+    '    ST["Live state"] --> STR["Strategy"] --> PL["Paper ledger"] --> RG["Risk guards"] --> EX["Executor"]',
+    '  end',
+    '  IN --> SVC',
+    '  IN --> REC["Recorders<br/>2 services"]',
+    '  REC --> DB[("SQLite<br/>per-second history")]',
+    '  DB --> RES["Offline research<br/>backtests · XGBoost"]',
+    '  SVC -.-|"strategy config"| RES',
+    '  SVC <-->|"orders, settlement"| API["Kalshi REST API"]',
+    '  SVC -->|"live state"| DASH["Dashboard"]'
+  ].join('\n');
+
+  var charts = [];
+  function tok(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  function drawArch(){
+    var el = document.getElementById('arch');
+    if (!window.mermaid || !el) return;
+    mermaid.initialize({
+      startOnLoad:false, securityLevel:'strict', theme:'base',
+      flowchart:{ curve:'basis', nodeSpacing:28, rankSpacing:42, padding:10, htmlLabels:true },
+      themeVariables:{
+        fontFamily:'IBM Plex Sans, -apple-system, Helvetica, Arial, sans-serif', fontSize:'13px',
+        background:tok('--bg'), primaryColor:tok('--bg'), primaryBorderColor:tok('--ink'),
+        primaryTextColor:tok('--ink'), lineColor:tok('--muted'), secondaryColor:tok('--code-bg'),
+        tertiaryColor:tok('--bg'), clusterBkg:tok('--code-bg'), clusterBorder:tok('--rule'),
+        edgeLabelBackground:tok('--bg'), titleColor:tok('--muted')
+      }
+    });
+    mermaid.render('arch-svg-' + Date.now(), ARCH).then(function(r){ el.innerHTML = r.svg; })
+      .catch(function(){ el.textContent = 'Diagram failed to load.'; });
+  }
+
+  function drawCharts(){
+    if (!window.Chart) return;
+    charts.forEach(function(c){ c.destroy(); }); charts = [];
+    var ink = tok('--ink'), muted = tok('--muted'), faint = tok('--faint'), grid = tok('--grid'),
+        accent = tok('--accent'), bar = tok('--bar'), s2 = tok('--s2');
+    Chart.defaults.font.family = 'IBM Plex Mono, ui-monospace, Menlo, monospace';
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = faint;
+    Chart.defaults.animation = false;
+    var axisTitle = function(t){ return { display:true, text:t, color:muted, font:{ family:'IBM Plex Sans, sans-serif', size:12 } }; };
+    var legend = { position:'bottom', align:'start', labels:{ color:ink, boxWidth:22, boxHeight:2, padding:14,
+      font:{ family:'IBM Plex Sans, sans-serif', size:12 } } };
+
+    var pts = function(a){ return a.map(function(p){ return { x:p[0], y:p[1] }; }); };
+    charts.push(new Chart(document.getElementById('roc'), {
+      type:'scatter',
+      data:{ datasets:[
+        { label:'XGBoost model, AUC 0.905', data:pts(D.model), showLine:true, borderColor:accent, borderWidth:2, pointRadius:0 },
+        { label:'Market price, AUC 0.907', data:pts(D.market), showLine:true, borderColor:s2, borderWidth:1.75, borderDash:[6,4], pointRadius:0 },
+        { label:'Chance', data:[{x:0,y:0},{x:1,y:1}], showLine:true, borderColor:faint, borderWidth:1, borderDash:[2,4], pointRadius:0 }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:Object.assign({}, legend, { labels:Object.assign({}, legend.labels, { filter:function(i){ return i.text !== 'Chance'; } }) }),
+          tooltip:{ enabled:false } },
+        scales:{
+          x:{ type:'linear', min:0, max:1, title:axisTitle('False positive rate'), grid:{ color:grid }, border:{ color:faint }, ticks:{ stepSize:0.2 } },
+          y:{ min:0, max:1, title:axisTitle('True positive rate'), grid:{ color:grid }, border:{ color:faint }, ticks:{ stepSize:0.2 } }
+        } }
+    }));
+
+    var sizeUp = D.days.indexOf('Jul 25');
+    var marker = { id:'marker', afterDatasetsDraw:function(c){
+      var x = c.scales.x.getPixelForValue(sizeUp), a = c.chartArea, g = c.ctx;
+      g.save(); g.strokeStyle = faint; g.setLineDash([3,4]); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(x, a.top); g.lineTo(x, a.bottom); g.stroke(); g.restore();
+    }};
+    charts.push(new Chart(document.getElementById('pnl'), {
+      data:{ labels:D.days, datasets:[
+        { type:'line', label:'Cumulative return', data:D.cum, borderColor:accent, borderWidth:2, pointRadius:0, tension:0, order:1 },
+        { type:'bar', label:'Daily return', data:D.daily, backgroundColor:bar, borderWidth:0, barPercentage:0.7, categoryPercentage:0.9, order:2 }
+      ]},
+      plugins:[marker],
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:legend,
+          tooltip:{ mode:'index', intersect:false, callbacks:{ label:function(c){ return c.dataset.label + ': ' + (c.parsed.y > 0 ? '+' : '') + c.parsed.y.toFixed(1) + '%'; } } } },
+        scales:{
+          x:{ grid:{ display:false }, border:{ color:faint }, ticks:{ autoSkip:false, maxRotation:0,
+              callback:function(v, i){ return i % 7 === 0 || i === D.days.length - 1 ? D.days[i] : ''; } } },
+          y:{ min:-15, max:30, title:axisTitle('Return on starting balance'), grid:{ color:function(c){ return c.tick.value === 0 ? faint : grid; } },
+              border:{ display:false }, ticks:{ stepSize:5, callback:function(v){ return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + '%'; } } }
+        } }
+    }));
+  }
+
+  function drawAll(){ drawArch(); drawCharts(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll); else drawAll();
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', drawAll);
+  }
+  new MutationObserver(drawAll).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+})();
+</script>
+</body>
+</html>
