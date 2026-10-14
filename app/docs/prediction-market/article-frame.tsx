@@ -13,16 +13,8 @@ export function ArticleFrame() {
     const document = element?.contentDocument;
     if (!loaded || !element || !document) return;
 
-    const styles = getComputedStyle(element);
     const root = document.documentElement;
-    root.style.setProperty('--sans', styles.fontFamily);
-    root.style.setProperty('--bg', styles.getPropertyValue('--bgColor-default'));
-    root.style.setProperty('--ink', styles.getPropertyValue('--fgColor-default'));
-    root.style.setProperty('--muted', styles.getPropertyValue('--fgColor-muted'));
-    root.style.setProperty('--rule', styles.getPropertyValue('--borderColor-default'));
     root.dataset.theme = resolvedColorMode ?? 'light';
-    document.body.style.padding = '24px';
-    document.body.style.fontSize = '16px';
     const backLink = document.querySelector<HTMLElement>('.back-link');
     if (backLink) backLink.style.display = 'none';
 
@@ -34,5 +26,5 @@ export function ArticleFrame() {
     return () => resize.disconnect();
   }, [loaded, resolvedColorMode]);
 
-  return <iframe ref={frame} className="article-frame" src="/docs/kalshi/article" title="Kalshi trading system write-up" onLoad={() => setLoaded(true)} />;
+  return <iframe ref={frame} className="article-frame" src="/docs/prediction-market/article" title="Prediction Market Inefficiency Research write-up" onLoad={() => setLoaded(true)} />;
 }

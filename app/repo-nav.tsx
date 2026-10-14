@@ -7,7 +7,7 @@ import {BookIcon, CodeIcon, GitPullRequestIcon} from '@primer/octicons-react';
 export function RepoNav() {
   const pathname = usePathname();
   const inDocs = pathname.startsWith('/docs');
-  const inCode = pathname.startsWith('/projects');
+  const inCode = pathname.startsWith('/projects') || pathname.startsWith('/experience') || pathname === '/readme';
   const inPullRequest = !inDocs && !inCode;
   return <nav className="repo-nav" aria-label="Repository">
     <Link href="/projects" className={inCode ? 'repo-active' : undefined} aria-current={inCode ? 'page' : undefined}><CodeIcon /> Code</Link>

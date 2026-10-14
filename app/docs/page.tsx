@@ -7,7 +7,7 @@ export default function DocsPage() {
     <p className="muted">Project write-ups and engineering notes.</p>
     <div className="file-box">
       <header className="file-header"><FileDirectoryIcon /><strong>docs</strong></header>
-      <Link className="doc-row" href="/docs/kalshi"><FileIcon /><strong>kalshi.html</strong><span>Prediction market trading system</span></Link>
+      <Link className="doc-row" href="/docs/prediction-market"><FileIcon /><strong>prediction-market.html</strong><span>Prediction market trading system</span></Link>
     </div>
   </main>;
 }
