@@ -4,7 +4,7 @@ import {MarkGithubIcon} from '@primer/octicons-react';
 import '@primer/primitives/dist/css/functional/themes/light.css';
 import '@primer/primitives/dist/css/functional/themes/dark.css';
 import '@primer/primitives/dist/css/base/size/size.css';
-import {Theme, ThemeSelect} from './theme';
+import {Theme, ThemeToggle} from './theme';
 import {profile} from './content';
 import {RepoNav} from './repo-nav';
 import './styles.css';
@@ -24,7 +24,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           <div className="global-bar">
             <a className="github-mark" href={profile.github} aria-label="Jacob Kobrick on GitHub"><MarkGithubIcon size={32} /></a>
             <div className="breadcrumbs"><a href={profile.github}>jacobkobr</a><span>/</span><Link href="/">portfolio</Link></div>
-            <ThemeSelect />
+            <ThemeToggle />
           </div>
           <RepoNav />
         </header>
