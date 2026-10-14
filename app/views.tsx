@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {Avatar, Label} from '@primer/react';
-import {GitCommitIcon, FileIcon, ChecklistIcon, ArrowRightIcon, CodeIcon} from '@primer/octicons-react';
+import {GitCommitIcon, FileIcon, ArrowRightIcon, CodeIcon} from '@primer/octicons-react';
 import {profile, projects, commits, portfolioFiles} from './content';
 import {readPortfolioFiles} from './portfolio-files';
 import {MarkdownFile} from './markdown';
@@ -50,14 +50,6 @@ export function Commits() {
         </div>
       </li>)}</ul>
     </section></div>
-  </section>;
-}
-
-export function Checks() {
-  return <section className="empty-checks" aria-labelledby="checks-title">
-    <ChecklistIcon size={32} />
-    <h2 id="checks-title">No checks configured</h2>
-    <p>No CI runs to show for this portfolio.</p>
   </section>;
 }
 

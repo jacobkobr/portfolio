@@ -94,10 +94,6 @@ code { background: var(--bgColor-accent-muted); color: var(--fgColor-accent); bo
 .commit-files > summary { padding: 4px; color: var(--fgColor-muted); border-radius: 4px; }
 .commit-files > ul { position: absolute; top: 100%; right: 0; z-index: 1; width: max-content; max-width: 70vw; list-style: none; padding: 8px; margin: 4px 0 0; border: 1px solid var(--borderColor-default); border-radius: 6px; background: var(--bgColor-default); }
 .commit-files li a { display: block; padding: 6px 8px; overflow-wrap: anywhere; }
-.empty-checks { padding: 72px 24px; text-align: center; border: 1px solid var(--borderColor-default); border-radius: 6px; }
-.empty-checks > svg { color: var(--fgColor-muted); margin-bottom: 16px; }
-.empty-checks h2 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-.empty-checks p { color: var(--fgColor-muted); margin-bottom: 0; }
 summary { display: flex; align-items: center; gap: 8px; padding: 16px; cursor: pointer; list-style: none; }
 summary::-webkit-details-marker { display: none; }
 details:not([open]) > summary > svg:first-child { transform: rotate(-90deg); }

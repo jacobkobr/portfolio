@@ -1,13 +1,12 @@
 import Link from 'next/link';
 import {CounterLabel} from '@primer/react';
-import {CommentDiscussionIcon, GitCommitIcon, GitPullRequestIcon, ChecklistIcon, FileDiffIcon, FileIcon, PersonIcon, LocationIcon, LinkIcon, BookIcon, MarkGithubIcon} from '@primer/octicons-react';
+import {CommentDiscussionIcon, GitCommitIcon, GitPullRequestIcon, FileDiffIcon, FileIcon, PersonIcon, LocationIcon, LinkIcon, BookIcon, MarkGithubIcon} from '@primer/octicons-react';
 import {profile, projects, commits, portfolioFiles} from './content';
-import {Conversation, Commits, Checks, Files} from './views';
+import {Conversation, Commits, Files} from './views';
 
 const tabs = [
   {id: 'conversation', name: 'Conversation', icon: CommentDiscussionIcon},
   {id: 'commits', name: 'Commits', icon: GitCommitIcon},
-  {id: 'checks', name: 'Checks', icon: ChecklistIcon},
   {id: 'files', name: 'Files changed', icon: FileDiffIcon},
 ];
 
@@ -25,12 +24,11 @@ export default async function Page({searchParams}: {searchParams: Promise<{tab?:
         {tabs.map(({id, name, icon: Icon}) => <Link key={id} href={id === 'conversation' ? '/' : `/?tab=${id}`} aria-current={active === id ? 'page' : undefined}>
           <Icon /><span>{name}</span>
           {id === 'commits' && <CounterLabel>{commits.length}</CounterLabel>}
-          {id === 'checks' && <CounterLabel>0</CounterLabel>}
           {id === 'files' && <CounterLabel>{portfolioFiles.length}</CounterLabel>}
         </Link>)}
       </nav>
       {active === 'conversation' ? <div className="conversation-layout"><Conversation /><Sidebar /></div> :
-        active === 'commits' ? <Commits /> : active === 'checks' ? <Checks /> : <Files />}
+        active === 'commits' ? <Commits /> : <Files />}
     </main>
   );
 }
