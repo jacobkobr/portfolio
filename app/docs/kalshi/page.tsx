@@ -1,24 +1,16 @@
-import Link from 'next/link';
-import {FileIcon, BookIcon} from '@primer/octicons-react';
+﻿import Link from 'next/link';
+import {FileIcon, ArrowLeftIcon, LinkExternalIcon} from '@primer/octicons-react';
 import {ArticleFrame} from './article-frame';
 
-export const metadata = {title: 'Kalshi · Documentation · Jacob Kobrick'};
+export const metadata = {title: 'Prediction Market Inefficiency Research · Documentation · Jacob Kobrick'};
 
 export default function KalshiDocsPage() {
-  return <main id="main" className="page">
-    <div className="docs-layout">
-      <aside className="docs-sidebar" aria-label="Documentation files">
-        <Link href="/docs"><BookIcon /> Documentation</Link>
-        <Link className="doc-selected" href="/docs/kalshi" aria-current="page"><FileIcon /> kalshi.html</Link>
-        <Link href="/?tab=files">Back to Files changed</Link>
-      </aside>
-      <div className="docs-content">
-        <nav className="doc-path" aria-label="Document path"><Link href="/docs">docs</Link><span>/</span><strong>kalshi.html</strong></nav>
-        <div className="file-box">
-          <header className="file-header"><FileIcon /><strong>Preview</strong><a href="/docs/kalshi/article">Open full page</a></header>
-          <ArticleFrame />
-        </div>
-      </div>
-    </div>
+  return <main id="main" className="page document-page">
+    <Link className="back-link" href="/docs"><ArrowLeftIcon /> Back to Documentation</Link>
+    <nav className="doc-path" aria-label="Document path"><Link href="/docs">docs</Link><span>/</span><strong>prediction_markets.html</strong></nav>
+    <article className="file-box">
+      <header className="file-header"><FileIcon /><strong>prediction_markets.html</strong><a className="file-action" href="/docs/kalshi/article" target="_blank" rel="noopener noreferrer" aria-label="Open full write-up in a new tab" title="Open full write-up in a new tab"><LinkExternalIcon /></a></header>
+      <ArticleFrame />
+    </article>
   </main>;
 }

@@ -121,6 +121,7 @@ summary:hover { background: var(--bgColor-muted); }
 .file-action { margin-left: auto; }
 .back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; }
 .project-page { max-width: 1100px; }
+.document-page { max-width: 1280px; }
 .doc-path { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
 .doc-row { display: flex; gap: 12px; align-items: center; padding: 16px; }
 .doc-row span { color: var(--fgColor-muted); margin-left: auto; }
@@ -154,12 +155,3 @@ footer { display: flex; justify-content: center; align-items: center; gap: 12px;
   .markdown h1 { font-size: 26px; }
   footer { align-items: flex-start; }
 }
-
-.docs-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; }
-.docs-content { min-width: 0; }
-.docs-sidebar { display: flex; flex-direction: column; gap: 8px; border-right: 1px solid var(--borderColor-muted); padding-right: 16px; }
-.docs-sidebar a { display: flex; align-items: center; gap: 8px; padding: 8px; color: var(--fgColor-default); }
-.docs-sidebar a:last-child { color: var(--fgColor-muted); font-size: 12px; }
-.doc-selected { background: var(--bgColor-accent-muted); border-radius: 6px; font-weight: 600; }
-  .docs-layout { grid-template-columns: minmax(0, 1fr); }
-  .docs-sidebar { border-right: 0; border-bottom: 1px solid var(--borderColor-muted); padding: 0 0 16px; }
