@@ -26,5 +26,5 @@ export function ArticleFrame() {
     return () => resize.disconnect();
   }, [loaded, resolvedColorMode]);
 
-  return <iframe ref={frame} className="article-frame" src="/docs/kalshi/article" title="Prediction Market Inefficiency Research write-up" onLoad={() => setLoaded(true)} />;
+  return <iframe ref={frame} className="article-frame" src="/docs/prediction-market/article" title="Prediction Market Inefficiency Research write-up" onLoad={() => setLoaded(true)} />;
 }

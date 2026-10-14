@@ -1,4 +1,4 @@
-﻿export const profile = {
+export const profile = {
   name: 'Jacob Kobrick',
   username: 'jacobkobr',
   github: 'https://github.com/jacobkobr',
@@ -7,7 +7,7 @@
 };
 
 export const projects = [
-  {slug: 'kalshi', name: 'Prediction Market Inefficiency Research', summary: 'Testing whether mispriced Bitcoin contracts could be traded profitably after spread and fees.'},
+  {slug: 'prediction-market', name: 'Prediction Market Inefficiency Research', summary: 'Testing whether mispriced Bitcoin contracts could be traded profitably after spread and fees.'},
   {slug: 'mata', name: 'Mata', summary: 'A desktop chat app for local Ollama models and cloud models, with subscription-based usage.'},
   {slug: 'chatmap', name: 'ChatMap', summary: 'A Chrome extension for finding messages in long ChatGPT conversations.'},
   {slug: 'keepsmile', name: 'Keepsmile BLE research', summary: 'Direct Bluetooth control for my LED lights, without the manufacturer’s app.'},

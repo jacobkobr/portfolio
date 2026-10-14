@@ -8,7 +8,7 @@ export function generateStaticParams() {
 
 export default async function ProjectPage({params}: {params: Promise<{slug: string}>}) {
   const {slug} = await params;
-  const file = portfolioFiles.find(item => item.path === `projects/${slug}.md`);
+  const file = portfolioFiles.find(item => item.href === `/projects/${slug}`);
   if (!file) notFound();
   return <FilePage file={file} />;
 }

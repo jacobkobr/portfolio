@@ -11,7 +11,7 @@ export function MarkdownFile({file}: {file: {path: string; source: string}}) {
         const target = path.posix.normalize(path.posix.join(path.posix.dirname(file.path), url));
         const page = portfolioFiles.find(item => item.path === target);
         if (page) return page.href;
-        if (target === 'docs/prediction_markets.html') return '/docs/kalshi';
+        if (target === 'docs/prediction-market.html') return '/docs/prediction-market';
         if (target.startsWith('public/')) return `/${target.slice(7)}`;
         return defaultUrlTransform(url);
       }}

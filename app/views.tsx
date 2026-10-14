@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import {Avatar, Label} from '@primer/react';
 import {GitCommitIcon, FileIcon, ChecklistIcon, ArrowRightIcon, CodeIcon} from '@primer/octicons-react';
 import {profile, projects, commits, portfolioFiles} from './content';
@@ -21,7 +21,7 @@ export function Conversation() {
           <Link href={`/projects/${project.slug}`}>{project.name}</Link>: {project.summary}
         </li>)}</ul>
         <h2>Documentation</h2>
-        <p><Link href="/docs/kalshi">Building an Automated Prediction Market Trading System</Link><br />How I tested the strategies, what didn’t work, and what happened when I started trading live.</p>
+        <p><Link href="/docs/prediction-market">Building an Automated Prediction Market Trading System</Link><br />How I tested the strategies, what didn’t work, and what happened when I started trading live.</p>
       </div>
     </article>
     <div className="timeline-event"><span className="event-icon"><GitCommitIcon /></span><p><Link href="/?tab=commits">View portfolio updates</Link></p></div>

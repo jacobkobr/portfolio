@@ -13,7 +13,7 @@ B.S. in Computer Science - December 2027
 
 ## Projects
 
-- [Prediction Market Inefficiency Research](projects/kalshi.md): testing whether mispriced Bitcoin contracts could be traded profitably after spread and fees.
+- [Prediction Market Inefficiency Research](projects/prediction-market.md): testing whether mispriced Bitcoin contracts could be traded profitably after spread and fees.
 - [Mata](projects/mata.md): a desktop chat app for local Ollama models and cloud models, with subscription-based usage.
 - [ChatMap](projects/chatmap.md): a Chrome extension for finding messages in long ChatGPT conversations.
 - [Keepsmile BLE research](projects/keepsmile.md): figuring out how to control my LED lights directly over Bluetooth.
@@ -24,7 +24,7 @@ B.S. in Computer Science - December 2027
 
 ## Documentation
 
-[Building an Automated Prediction Market Trading System](docs/prediction_markets.html)
+[Building an Automated Prediction Market Trading System](docs/prediction-market.html)
 
 ## Links
 

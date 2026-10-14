@@ -18,4 +18,4 @@ The full write-up covers those experiments and what happened in live trading, in
 
 ## Research report
 
-[Building an Automated Prediction Market Trading System](../docs/prediction_markets.html)
+[Building an Automated Prediction Market Trading System](../docs/prediction-market.html)
