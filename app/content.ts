@@ -90,3 +90,10 @@ export const contentTodos = [
   'Confirm public repository URLs for Kalshi and KVM Switch before linking them.',
   'Add verified project screenshots if supplied.',
 ];
+
+export const portfolioFiles = [
+  {path: 'README.md', href: '/readme'},
+  {path: 'experience/fox.md', href: '/experience/fox'},
+  ...projects.map(project => ({path: `projects/${project.slug}.md`, href: `/projects/${project.slug}`})),
+];
+
