@@ -30,7 +30,6 @@ export const commits = [
 ];
 
 export const contentTodos = [
-  'Confirm FOX employment dates and public-safe responsibilities before expanding experience/fox.md.',
   'Confirm the exact ChatMap store publication date before describing the June 3 documentation update as launch day.',
   'Confirm the public repository URL for the prediction market project before linking it.',
 ];
