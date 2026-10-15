@@ -9,11 +9,16 @@ export function ArticleFrame() {
   const {resolvedColorMode} = useTheme();
 
   useEffect(() => {
+    if (!window.location.hash) window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const element = frame.current;
     const document = element?.contentDocument;
     if (!loaded || !element || !document) return;
 
     const root = document.documentElement;
+    root.style.overflowAnchor = 'none';
     root.dataset.theme = resolvedColorMode ?? 'light';
     const backLink = document.querySelector<HTMLElement>('.back-link');
     if (backLink) backLink.style.display = 'none';

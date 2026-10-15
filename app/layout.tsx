@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   // Primer's focus polyfill adds these attributes before React hydrates.
   return (
-    <html lang="en" className="js-focus-visible" data-js-focus-visible="">
+    <html lang="en" className="js-focus-visible" data-js-focus-visible="" data-color-mode="dark" data-dark-theme="dark">
       <body><Theme>
         <a className="skip-link" href="#main">Skip to content</a>
         <header className="site-header">
