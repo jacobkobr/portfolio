@@ -140,7 +140,7 @@ footer { display: flex; justify-content: center; align-items: center; gap: 12px;
   .pr-tabs a { padding: 12px; }
   .conversation-layout, .files-layout { grid-template-columns: minmax(0, 1fr); }
   .timeline { padding-left: 0; }
-  .file-tree { position: static; display: flex; flex-wrap: wrap; gap: 12px; border-right: 0; border-bottom: 1px solid var(--borderColor-muted); padding: 0 0 12px; }
+  .file-tree { position: static; border-right: 0; border-bottom: 1px solid var(--borderColor-muted); padding: 0 0 12px; }
   .doc-row { flex-wrap: wrap; }
   .doc-row span { width: 100%; margin-left: 28px; }
   .comment-avatar { display: none; }
