@@ -35,9 +35,9 @@ export default async function Page({searchParams}: {searchParams: Promise<{tab?:
 
 function Sidebar() {
   return <aside className="sidebar" aria-label="About Jacob">
-    <section><h2>Author</h2><a className="author-link" href={profile.github}><PersonIcon /><strong>jacobkobr</strong></a><p>Jacob Kobrick</p><p><LocationIcon /> Tempe, Arizona</p></section>
+    <section><h2>Author</h2><a className="author-link" href={profile.github}><PersonIcon /><strong>jacobkobr</strong></a><p><LocationIcon /> Tempe, Arizona</p></section>
     <section><h2>Experience</h2><strong>FOX Technology</strong><p>Software Engineering Intern</p><p>June 2025 – Present · Tempe, AZ</p></section>
-    <section><h2>Education</h2><p><BookIcon /> Arizona State University</p><p>B.S. in Computer Science - December 2027</p></section>
+    <section><h2>Education</h2><p><BookIcon /> Arizona State University</p><p>Barrett, The Honors College</p><p>B.S. in Computer Science - December 2027</p></section>
     <section><h2>Projects</h2>{projects.map(project => <Link className="sidebar-project" key={project.slug} href={`/projects/${project.slug}`}><FileIcon />{project.name}</Link>)}</section>
     <section><h2>Links</h2><a href={profile.github}><MarkGithubIcon /> GitHub profile</a><a className="sidebar-project" href={profile.linkedin}><LinkIcon /> LinkedIn</a></section>
   </aside>;

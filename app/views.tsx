@@ -13,7 +13,7 @@ export function Conversation() {
       <header className="comment-header"><span><strong>jacobkobr</strong> <span className="muted">opened this portfolio</span></span><Label>Author</Label></header>
       <div className="markdown">
         <h2>Hi, I’m Jacob.</h2>
-        <p>I’m studying computer science at Arizona State University and expect to finish my B.S. in December 2027.</p>
+        <p>I’m studying computer science at Arizona State University as part of Barrett, The Honors College, and expect to finish my B.S. in December 2027.</p>
         <h2>Experience</h2>
         <p><strong><Link href="/experience/fox">FOX Technology</Link></strong><br />Software Engineering Intern<br />June 2025 – Present · Tempe, AZ</p>
         <h2>What I’ve been building</h2>

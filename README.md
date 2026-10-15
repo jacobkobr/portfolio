@@ -5,6 +5,7 @@ I study computer science at Arizona State University and work as a software engi
 ## Education
 
 Arizona State University  
+Barrett, The Honors College  
 B.S. in Computer Science - December 2027
 
 ## Experience
