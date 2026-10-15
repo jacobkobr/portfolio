@@ -1,12 +1,10 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {MarkGithubIcon} from '@primer/octicons-react';
-import '@primer/primitives/dist/css/functional/themes/light.css';
 import '@primer/primitives/dist/css/functional/themes/dark.css';
 import '@primer/primitives/dist/css/base/size/size.css';
 import {Theme, ThemeToggle} from './theme';
 import {profile} from './content';
-import {RepoNav} from './repo-nav';
 import './styles.css';
 
 export const metadata: Metadata = {
@@ -30,10 +28,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             <div className="breadcrumbs"><a href={profile.github}>jacobkobr</a><span>/</span><Link href="/">portfolio</Link></div>
             <ThemeToggle />
           </div>
-          <RepoNav />
         </header>
         {children}
-        <footer>Jacob Kobrick</footer>
+        <footer><Link href="/">Jacob Kobrick</Link><Link href="/docs">Documentation</Link></footer>
       </Theme></body>
     </html>
   );
