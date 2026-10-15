@@ -12,6 +12,10 @@ import './styles.css';
 export const metadata: Metadata = {
   title: "Jacob Kobrick's Portfolio",
   description: 'My education, experience, and what I enjoy building!',
+  icons: {
+    icon: '/avatar.png',
+    apple: '/avatar.png',
+  },
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
