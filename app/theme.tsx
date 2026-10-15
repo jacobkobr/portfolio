@@ -10,7 +10,7 @@ export function Theme({children}: {children: React.ReactNode}) {
 
 export function ThemeToggle() {
   return <button className="theme-toggle" type="button" role="switch" aria-checked="true" aria-label="Dark mode"
-    onClick={() => window.alert('403: Insufficient taste. Ignored.')}>
+    onClick={() => window.alert('403: Insufficient taste.')}>
     <MoonIcon size={20} />
   </button>;
 }
