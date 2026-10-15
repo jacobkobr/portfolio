@@ -35,9 +35,12 @@ select { padding: 4px 8px; color: var(--fgColor-default); background: var(--bgCo
 .open-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 24px; padding: 5px 12px; background: var(--bgColor-open-emphasis); color: var(--fgColor-onEmphasis); font-weight: 500; }
 code { background: var(--bgColor-accent-muted); color: var(--fgColor-accent); border-radius: 4px; padding: 2px 5px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; }
 .pr-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--borderColor-default); margin: 24px 0; overflow-x: auto; }
-.pr-tabs a { display: flex; align-items: center; gap: 8px; white-space: nowrap; padding: 12px 16px; color: var(--fgColor-default); border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; }
+.pr-tabs a { display: flex; flex-shrink: 0; align-items: center; gap: 8px; white-space: nowrap; padding: 12px 16px; color: var(--fgColor-default); border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; }
 .pr-tabs a[aria-current] { font-weight: 600; border-color: var(--borderColor-default); background: var(--bgColor-default); position: relative; }
-.pr-tabs a:hover, .repo-nav a:hover { background: var(--bgColor-muted); text-decoration: none; }
+.pr-tabs a:hover, .repo-nav a:hover { text-decoration: none; }
+@media (hover: hover) and (pointer: fine) {
+  .pr-tabs a:not([aria-current]):hover, .repo-nav a:hover { background: var(--bgColor-muted); }
+}
 .conversation-layout { display: grid; grid-template-columns: minmax(0, 1fr) 256px; gap: 32px; }
 .timeline { padding-left: 56px; position: relative; }
 .comment-avatar { position: absolute; left: 0; top: 0; }
