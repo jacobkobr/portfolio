@@ -6,7 +6,11 @@ Open MC Host is a web dashboard for running Minecraft Java servers on your own L
 
 It supports Vanilla, Paper, Purpur, Fabric, Forge, and NeoForge, with exact version selection. The dashboard handles server controls, logs, console commands, files, backups, and resource monitoring.
 
+![Open MC Host monitoring a Fabric server, with CPU, memory, player count, uptime, and I/O metrics](../public/projects/open-mc-host-server.webp)
+
 Modrinth and Hangar searches filter content by compatibility. Before installing a mod or plugin, you can inspect its version and dependencies. Downloads are checked against provider checksums before installation.
+
+![Open MC Host's dark-mode mod catalog showing Sodium search results and compatibility with the selected Fabric server](../public/projects/open-mc-host-catalog.webp)
 
 ## Sharing access
 
