@@ -2,7 +2,7 @@ import Link from 'next/link';
 import {FileIcon, ArrowLeftIcon, LinkExternalIcon} from '@primer/octicons-react';
 import {ArticleFrame} from './article-frame';
 
-export const metadata = {title: 'Prediction Market Inefficiency Research · Documentation · Jacob Kobrick'};
+export const metadata = {title: 'Prediction Market Inefficiency Research | Documentation | Jacob Kobrick'};
 
 export default function PredictionMarketDocsPage() {
   return <main id="main" className="page document-page">

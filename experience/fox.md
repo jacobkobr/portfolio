@@ -1,8 +1,8 @@
-# FOX Technology
+# FOX Technology | Tempe, AZ
 
 **Software Engineering Intern**
 
-June 2025 – Present · Tempe, AZ
+June 2025 – Present
 
 I work on software projects supporting FOX's broadcast and streaming infrastructure, including real-time video systems, machine learning, backend development, and automation. I've been fortunate to work with a great team of engineers and operators who share their experience and help me understand how these systems are used day to day. Together, we work through operational problems, develop new tools, and improve existing production systems.
 

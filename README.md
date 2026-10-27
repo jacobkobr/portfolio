@@ -29,4 +29,4 @@ B.S. in Computer Science - December 2027
 
 ## Links
 
-[GitHub](https://github.com/jacobkobr) · [LinkedIn](https://www.linkedin.com/in/jacob-kobrick/)
+[GitHub](https://github.com/jacobkobr) | [LinkedIn](https://www.linkedin.com/in/jacob-kobrick/)

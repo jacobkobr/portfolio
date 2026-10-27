@@ -256,7 +256,7 @@ footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font:40
   var ARCH = [
     'flowchart LR',
     '  subgraph IN["Market data"]',
-    '    WS["Kalshi WebSocket<br/>order book · trades"]',
+    '    WS["Kalshi WebSocket<br/>order book, trades"]',
     '    CF["CF Benchmarks BRTI<br/>settlement index, 1 Hz"]',
     '  end',
     '  subgraph SVC["Trading service (FastAPI)"]',
@@ -266,7 +266,7 @@ footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font:40
     '  IN --> SVC',
     '  IN --> REC["Recorders<br/>2 services"]',
     '  REC --> DB[("SQLite<br/>per-second history")]',
-    '  DB --> RES["Offline research<br/>backtests · XGBoost"]',
+    '  DB --> RES["Offline research<br/>backtests, XGBoost"]',
     '  SVC -.-|"strategy config"| RES',
     '  SVC <-->|"orders, settlement"| API["Kalshi REST API"]',
     '  SVC -->|"live state"| DASH["Dashboard"]'

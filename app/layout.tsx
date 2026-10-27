@@ -30,7 +30,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           </div>
         </header>
         {children}
-        <footer><Link href="/">Jacob Kobrick</Link><Link href="/docs">Documentation</Link></footer>
+        <footer><span>Jacob Kobrick</span></footer>
       </Theme></body>
     </html>
   );
