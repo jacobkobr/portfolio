@@ -12,6 +12,7 @@ export const projects = [
   {slug: 'chatmap', name: 'ChatMap', summary: 'A Chrome extension for finding messages in long ChatGPT conversations.'},
   {slug: 'keepsmile', name: 'Keepsmile BLE research', summary: 'Direct Bluetooth control for my LED lights, without the manufacturer’s app.'},
   {slug: 'open-mc-host', name: 'Open MC Host', summary: 'A self-hosted dashboard for running Minecraft servers and giving friends access.'},
+  {slug: 'vmaf-optimizer', name: 'VMAF Optimizer', summary: 'Finding the smallest compression setting for each game clip that still clears a quality score.'},
   {slug: 'kvm-switch', name: 'KVM Switch', summary: 'Working toward one shortcut to switch a monitor, keyboard, and mouse between a PC and a Mac.'},
   {slug: 'arc-raiders-util', name: 'ArcRaidersUtil', summary: 'Reading inventory screenshots to identify items, stack counts, and their positions.'},
   {slug: 'toggle-reddit-sidebar', name: 'Toggle Reddit Sidebar', summary: 'An older Chrome extension that hides the Reddit sidebar and remembers the setting.'},
