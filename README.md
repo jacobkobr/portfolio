@@ -20,6 +20,7 @@ B.S. in Computer Science - December 2027
 - [Keepsmile BLE research](projects/keepsmile.md): figuring out how to control my LED lights directly over Bluetooth.
 - [Open MC Host](projects/open-mc-host.md): a self-hosted dashboard for running Minecraft servers and giving friends access.
 - [VMAF Optimizer](projects/vmaf-optimizer.md): finding the smallest compression setting for each game clip that still clears a quality score.
+- [win-volume](projects/win-volume.md): hotkeys and scroll-wheel controls for the volume of the app in focus.
 - [KVM Switch](projects/kvm-switch.md): working toward one shortcut to switch a monitor, keyboard, and mouse between a PC and a Mac.
 - [ArcRaidersUtil](projects/arc-raiders-util.md): reading inventory screenshots to identify items, stack counts, and their positions.
 - [Toggle Reddit Sidebar](projects/toggle-reddit-sidebar.md): an older Chrome extension that hides the Reddit sidebar and remembers the setting.
