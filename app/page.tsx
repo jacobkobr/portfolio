@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import {CounterLabel} from '@primer/react';
+import {CounterLabel, Tooltip} from '@primer/react';
 import {CommentDiscussionIcon, GitCommitIcon, GitPullRequestIcon, FileDiffIcon, FileIcon, PersonIcon, LocationIcon, LinkIcon, BookIcon, MarkGithubIcon} from '@primer/octicons-react';
 import {profile, projects, commits, portfolioFiles} from './content';
 import {Conversation, Commits, Files} from './views';
 
 const tabs = [
-  {id: 'conversation', name: 'Conversation', icon: CommentDiscussionIcon},
-  {id: 'commits', name: 'Commits', icon: GitCommitIcon},
-  {id: 'files', name: 'Files changed', icon: FileDiffIcon},
+  {id: 'conversation', name: 'Conversation', description: 'About me, education, and experience', icon: CommentDiscussionIcon},
+  {id: 'commits', name: 'Commits', description: 'Updates to my portfolio', icon: GitCommitIcon},
+  {id: 'files', name: 'Files changed', description: 'Browse my projects and experience', icon: FileDiffIcon},
 ];
 
 export default async function Page({searchParams}: {searchParams: Promise<{tab?: string}>}) {
@@ -21,11 +21,11 @@ export default async function Page({searchParams}: {searchParams: Promise<{tab?:
         <div className="pr-meta"><span className="open-badge"><GitPullRequestIcon /> Open</span><span><strong>jacobkobr</strong> proposes <strong>{projects.length} projects</strong> from <code>jacob</code> into <code>portfolio</code></span></div>
       </div>
       <nav className="pr-tabs" aria-label="Pull request views">
-        {tabs.map(({id, name, icon: Icon}) => <Link key={id} href={id === 'conversation' ? '/' : `/?tab=${id}`} aria-current={active === id ? 'page' : undefined}>
+        {tabs.map(({id, name, description, icon: Icon}) => <Tooltip key={id} text={description} delay="short" type="description"><Link href={id === 'conversation' ? '/' : `/?tab=${id}`} aria-current={active === id ? 'page' : undefined}>
           <Icon /><span>{name}</span>
           {id === 'commits' && <CounterLabel>{commits.length}</CounterLabel>}
           {id === 'files' && <CounterLabel>{portfolioFiles.length}</CounterLabel>}
-        </Link>)}
+        </Link></Tooltip>)}
       </nav>
       {active === 'conversation' ? <div className="conversation-layout"><Conversation /><Sidebar /></div> :
         active === 'commits' ? <Commits /> : <Files />}
